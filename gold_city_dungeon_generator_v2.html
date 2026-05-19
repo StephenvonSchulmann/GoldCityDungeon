@@ -1,0 +1,263 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --gold:#c9a84c;--gold-dark:#8a6f2e;--stone:#2a2520;--stone-light:#3d3530;
+    --tile:#c4b89a;--tile-dark:#a89e82;--border-outer:#5a4a2a;
+    --text-dark:#2a1e0e;--text-dim:#a09070;--bg:#0d0b08;
+  }
+  #app{background:var(--bg);padding:16px 12px 40px;font-family:'Cinzel',serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+  .card-outer{width:340px;background:var(--stone);border-radius:20px;border:3px solid var(--border-outer);box-shadow:inset 0 0 0 2px #2a2010,inset 0 0 0 4px var(--stone-light);overflow:hidden;}
+  .card-title-bar{background:var(--bg);border-bottom:2px solid var(--gold-dark);padding:9px 16px 7px;text-align:center;}
+  .card-title-bar h1{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:17px;letter-spacing:2px;}
+  .card-body{background:var(--tile);background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.12) 27px,rgba(0,0,0,.12) 28px),repeating-linear-gradient(90deg,transparent,transparent 27px,rgba(0,0,0,.12) 27px,rgba(0,0,0,.12) 28px);padding:6px;}
+  .card-footer{background:var(--bg);border-top:2px solid var(--gold-dark);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;}
+  .card-footer span{font-size:9px;color:var(--text-dim);letter-spacing:.5px;}
+
+  .wall{height:6px;background:var(--stone);display:flex;align-items:center;justify-content:space-around;padding:0 18px;margin:0 -6px;}
+  .arrow{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--tile);flex-shrink:0;}
+
+  .floor-row{display:flex;gap:3px;}
+
+  .room{
+    width:88px;flex-shrink:0;
+    background:var(--tile);
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.1) 27px,rgba(0,0,0,.1) 28px),repeating-linear-gradient(90deg,transparent,transparent 27px,rgba(0,0,0,.1) 27px,rgba(0,0,0,.1) 28px);
+    border:3px solid var(--stone);
+    padding:5px 4px 7px;
+    min-height:90px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    cursor:pointer;transition:filter .15s,transform .1s;
+  }
+  .room:hover{filter:brightness(1.07);}
+  .room:active{transform:scale(.97);}
+  .room.wide{width:auto;flex:1;}
+  .room.shortcut{background:var(--tile-dark);background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.13) 27px,rgba(0,0,0,.13) 28px),repeating-linear-gradient(90deg,transparent,transparent 27px,rgba(0,0,0,.13) 27px,rgba(0,0,0,.13) 28px);min-height:160px;width:62px;flex-shrink:0;}
+  .room-label{font-size:7px;font-weight:700;color:#5a4a30;text-transform:uppercase;letter-spacing:.8px;text-align:center;opacity:.75;}
+  .room-effect{font-family:'EB Garamond',serif;font-size:11px;color:var(--text-dark);text-align:center;line-height:1.35;font-style:italic;}
+  .shortcut-penalty{font-family:'EB Garamond',serif;font-size:9.5px;color:#7a2e18;text-align:center;font-weight:600;margin-top:2px;}
+
+  .mid-col{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+
+  .btn-gen{width:340px;margin-top:12px;padding:13px;background:var(--bg);border:2px solid var(--gold);border-radius:12px;color:var(--gold);font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:background .2s,transform .1s;}
+  .btn-gen:hover{background:rgba(201,168,76,.12);}
+  .btn-gen:active{transform:scale(.98);}
+  .hint{font-family:'EB Garamond',serif;font-size:12px;font-style:italic;color:var(--text-dim);text-align:center;margin-top:6px;}
+
+  .editor{width:340px;margin-top:20px;background:#161210;border:1px solid var(--gold-dark);border-radius:12px;overflow:hidden;}
+  .editor-tabs{display:flex;border-bottom:1px solid var(--gold-dark);}
+  .etab{flex:1;padding:8px 4px;background:transparent;border:none;color:var(--text-dim);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5px;cursor:pointer;text-transform:uppercase;transition:color .15s,background .15s;}
+  .etab.active{color:var(--gold);background:#1f1a15;}
+  .editor-body{padding:10px;}
+  .effect-item{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;}
+  .effect-item textarea{flex:1;background:#1f1a15;border:1px solid #3a3020;border-radius:6px;color:#d4c49a;font-family:'EB Garamond',serif;font-size:12px;font-style:italic;padding:5px 7px;resize:none;line-height:1.35;min-height:40px;}
+  .effect-item textarea:focus{outline:none;border-color:var(--gold-dark);}
+  .btn-del{background:transparent;border:1px solid #3a3020;border-radius:5px;color:#7a4a3a;font-size:14px;padding:3px 7px;cursor:pointer;flex-shrink:0;line-height:1;transition:border-color .15s,color .15s;}
+  .btn-del:hover{border-color:#7a2e18;color:#c04020;}
+  .btn-add{width:100%;margin-top:4px;padding:7px;background:transparent;border:1px dashed #3a3020;border-radius:6px;color:#7a6a4a;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:border-color .15s,color .15s;}
+  .btn-add:hover{border-color:var(--gold-dark);color:var(--gold);}
+  .pool-note{font-family:'EB Garamond',serif;font-size:11px;font-style:italic;color:var(--text-dim);margin-bottom:8px;text-align:center;line-height:1.4;}
+  .pool-warn{color:#c06040;}
+
+  @keyframes fadeIn{from{opacity:.3;transform:scale(.99);}to{opacity:1;transform:scale(1);}}
+  .refreshing{animation:fadeIn .3s ease forwards;}
+</style>
+
+<div id="app">
+  <div class="card-outer">
+    <div class="card-title-bar"><h1>Gold City</h1></div>
+    <div class="card-body" id="card-body"></div>
+    <div class="card-footer"><span>R 2026 · DMS · EN</span><span style="font-size:14px">🍕</span></div>
+  </div>
+  <button class="btn-gen" onclick="generate()">⚔ Enter the Dungeon</button>
+  <p class="hint">Tap any room to reroll just that effect</p>
+
+  <div class="editor">
+    <div class="editor-tabs" id="editor-tabs"></div>
+    <div class="editor-body" id="editor-body"></div>
+  </div>
+</div>
+
+<script>
+const LEVEL_NAMES = ['Level 1','Level 2','Level 3','Level 4','Level 5'];
+const LEVEL_COUNTS = [1, 3, 5, 2, 1];
+
+let POOLS = [
+  [
+    "Surveil 2.",
+    "Target player mills 3.",
+    "Sacrifice an artifact, enchantment, or token to draw a card.",
+    "Return target noncreature permanent from your graveyard to your hand.",
+    "Each player discards a card.",
+    "Exile a card from target graveyard."
+  ],
+  [
+    "Search your library for a basic land and put it onto the battlefield tapped.",
+    "Put two +1/+1 counters on target creature.",
+    "Create a 1/1 green Plant creature token.",
+    "Exile the top card of your library. You may cast it until end of your next turn.",
+    "Target creature gains deathtouch until end of turn.",
+    "Target player loses 2 life and you gain 2 life."
+  ],
+  [
+    "Create two 2/2 black Zombies with decayed.",
+    "Create a tapped Key token. Draw a card.",
+    "Create two Food tokens.",
+    "Create a 3/1 red Orc Warrior token.",
+    "Target player loses 2 life and draws two cards.",
+    "Target creature phases out."
+  ],
+  [
+    "Target creature gains indestructible until end of turn.",
+    "Target artifact in your graveyard has unearth {3} until end of turn.",
+    "Make a copy of target permanent you control with mana value 3 or less.",
+    "Until your next turn, cast artifact and creature spells as though they had flash.",
+    "Destroy target noncreature nonland permanent.",
+    "Tap up to two target creatures. Put a stun counter on each of them."
+  ],
+  [
+    "You get an emblem: \"Whenever you venture into the Gold City, return target creature from a graveyard to the battlefield under your control.\"",
+    "Draw five cards. You have no maximum hand size for the rest of the game.",
+    "For each player, choose a creature they control. Return all other creatures to their owner's hand.",
+    "Create six Treasure tokens. When you next cast a spell this turn, copy that spell. You may choose new targets for the copy.",
+    "Creatures you control get +X/+X and trample until end of turn, where X is the number of lands you control.",
+    "Create a 9/9 Flying Indestructible Lion Demon with \"When this creature deals combat damage, you may discard your hand. If you do, add three mana of any color.\""
+  ]
+];
+
+const KEYS = ['f1','f2a','f2b','f2c','f3a','f3b','f3c','sca','scb','f4a','f4b','f5'];
+const KEY_POOL = [0,1,1,1,2,2,2,2,2,3,3,4];
+let state = {};
+let activeTab = 0;
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-.5); }
+
+function pickUnique(poolIdx, count){
+  const pool = POOLS[poolIdx];
+  if(pool.length < count) return shuffle(pool);
+  return shuffle(pool).slice(0, count);
+}
+
+function generate(){
+  const byPool = {};
+  KEYS.forEach((k,i)=>{ const p=KEY_POOL[i]; byPool[p]=(byPool[p]||[]); byPool[p].push(k); });
+  Object.entries(byPool).forEach(([p,keys])=>{
+    const picks = pickUnique(Number(p), keys.length);
+    keys.forEach((k,i)=>state[k]=picks[i]||POOLS[p][0]);
+  });
+  render();
+  document.querySelector('.btn-gen').textContent='⚔ New Dungeon';
+}
+
+function rerollKey(key){
+  const pi = KEY_POOL[KEYS.indexOf(key)];
+  const pool = POOLS[pi];
+  const used = KEYS.filter((_,i)=>KEY_POOL[i]===pi && KEYS[i]!==key).map(k=>state[k]);
+  const avail = pool.filter(e=>!used.includes(e) && e!==state[key]);
+  if(!avail.length) return;
+  state[key] = avail[Math.floor(Math.random()*avail.length)];
+  render();
+}
+
+function wall(n){
+  let a='';
+  for(let i=0;i<n;i++) a+='<div class="arrow"></div>';
+  return `<div class="wall">${a}</div>`;
+}
+
+function roomEl(key, label, extraCls, penalty){
+  const eff = state[key]||'';
+  const pen = penalty?`<div class="shortcut-penalty">${penalty}</div>`:'';
+  return `<div class="room${extraCls?' '+extraCls:''}" onclick="rerollKey('${key}')">
+    <div class="room-label">${label}</div>
+    <div class="room-effect">${eff}</div>
+    ${pen}
+  </div>`;
+}
+
+function render(){
+  const cb = document.getElementById('card-body');
+  cb.innerHTML=`
+    <div class="floor-row">${roomEl('f1','Floor 1','wide')}</div>
+    ${wall(3)}
+    <div class="floor-row">
+      ${roomEl('f2a','Floor 2a','')}
+      ${roomEl('f2b','Floor 2b','')}
+      ${roomEl('f2c','Floor 2c','')}
+    </div>
+    ${wall(5)}
+    <div class="floor-row">
+      ${roomEl('sca','Short Cut a','shortcut','Lose 3 life.')}
+      <div class="mid-col">
+        <div class="floor-row">
+          ${roomEl('f3a','Floor 3a','')}
+          ${roomEl('f3b','Floor 3b','')}
+        </div>
+        ${wall(2)}
+        <div class="floor-row">${roomEl('f3c','Floor 3c','wide')}</div>
+      </div>
+      ${roomEl('scb','Short Cut b','shortcut','Discard two cards.')}
+    </div>
+    ${wall(3)}
+    <div class="floor-row">
+      ${roomEl('f4a','Floor 4a','')}
+      ${roomEl('f4b','Floor 4b','')}
+    </div>
+    ${wall(2)}
+    <div class="floor-row">${roomEl('f5','Floor 5','wide')}</div>
+  `;
+  cb.classList.remove('refreshing');
+  void cb.offsetWidth;
+  cb.classList.add('refreshing');
+}
+
+function renderEditor(){
+  const tabs = document.getElementById('editor-tabs');
+  const body = document.getElementById('editor-body');
+  tabs.innerHTML = LEVEL_NAMES.map((n,i)=>
+    `<button class="etab${i===activeTab?' active':''}" onclick="setTab(${i})">${n}</button>`
+  ).join('');
+
+  const pool = POOLS[activeTab];
+  const needed = LEVEL_COUNTS[activeTab];
+  const warn = pool.length < needed
+    ? `<span class="pool-warn">Need at least ${needed} effects for this level (have ${pool.length}).</span>`
+    : `${pool.length} effects · ${needed} shown per dungeon`;
+
+  const items = pool.map((eff,i)=>`
+    <div class="effect-item">
+      <textarea rows="2" oninput="editEffect(${activeTab},${i},this.value)">${eff}</textarea>
+      <button class="btn-del" onclick="deleteEffect(${activeTab},${i})">✕</button>
+    </div>`).join('');
+
+  body.innerHTML=`
+    <div class="pool-note">${warn}</div>
+    ${items}
+    <button class="btn-add" onclick="addEffect(${activeTab})">+ Add Effect</button>
+  `;
+}
+
+function setTab(i){ activeTab=i; renderEditor(); }
+
+function editEffect(poolIdx, effIdx, val){
+  POOLS[poolIdx][effIdx]=val;
+}
+
+function deleteEffect(poolIdx, effIdx){
+  POOLS[poolIdx].splice(effIdx,1);
+  renderEditor();
+}
+
+function addEffect(poolIdx){
+  POOLS[poolIdx].push('New effect.');
+  renderEditor();
+  const textareas = document.getElementById('editor-body').querySelectorAll('textarea');
+  textareas[textareas.length-1].focus();
+  textareas[textareas.length-1].select();
+}
+
+generate();
+renderEditor();
+</script>
